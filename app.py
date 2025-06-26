@@ -70,15 +70,25 @@ cols = st.columns(num_cols_display)
 
 for i, feature in enumerate(selected_feature_names):
     with cols[i % num_cols_display]:
-        # Berikan nilai default yang masuk akal
-        input_data[feature] = st.number_input(f"{feature.replace('_', ' ').title()}", value=15.0, format="%.4f", key=feature)
-        # Mengatur nilai default yang lebih relevan untuk fitur ini, misal:
+        # Mengatur nilai default yang lebih relevan untuk fitur ini
         if feature == 'mean_radius':
-            input_data[feature] = st.number_input(f"{feature.replace('_', ' ').title()}", value=17.99, format="%.4f", key=feature + '_val')
+            default_value = 17.99
         elif feature == 'mean_texture':
-            input_data[feature] = st.number_input(f"{feature.replace('_', ' ').title()}", value=10.38, format="%.4f", key=feature + '_val')
+            default_value = 10.38
         elif feature == 'mean_perimeter':
-            input_data[feature] = st.number_input(f"{feature.replace('_', ' ').title()}", value=122.80, format="%.4f", key=feature + '_val')
+            default_value = 122.80
+        else:
+            # Fallback jika ada fitur lain yang ditambahkan ke selected_feature_names
+            default_value = 0.0 # Ini seharusnya tidak terjadi dengan 3 fitur yang sudah ditetapkan
+
+        # Hanya ada satu panggilan st.number_input per fitur terpilih
+        # Gunakan nilai default yang sudah ditentukan di atas
+        input_data[feature] = st.number_input(
+            f"{feature.replace('_', ' ').title()}",
+            value=default_value,
+            format="%.4f",
+            key=feature # Menggunakan nama fitur sebagai kunci unik
+        )
 
 
 st.markdown("---")
@@ -91,9 +101,12 @@ if st.button("Prediksi Diagnosis"):
     full_features_array = np.zeros((1, len(all_feature_names)))
 
     # Isi nilai untuk 3 fitur yang dipilih dari input pengguna
-    for i, feature_name in enumerate(all_feature_names):
-        if feature_name in input_data:
-            full_features_array[0, i] = input_data[feature_name]
+    # Pastikan untuk mengisi nilai sesuai dengan indeks fitur di all_feature_names
+    for feature_name, value in input_data.items():
+        if feature_name in all_feature_names:
+            idx = all_feature_names.index(feature_name)
+            full_features_array[0, idx] = value
+
 
     # Skalakan semua 30 fitur (termasuk yang default)
     scaled_features = scaler.transform(full_features_array)
