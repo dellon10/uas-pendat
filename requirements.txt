@@ -1,0 +1,9 @@
+flask
+scikit-learn
+numpy
+gunicorn
+streamlit
+scikit-learn
+numpy
+pandas
+ucimlrepo
